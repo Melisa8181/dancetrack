@@ -1,0 +1,69 @@
+@import 'tailwindcss';
+
+/*
+  Sistema visual de DanceTrack
+  - Bordó (wine): marca, navegación, botones principales y acciones importantes.
+  - Marfil cálido (paper): fondo de las páginas. Blanco roto (card): tarjetas y superficies de contenido.
+  - Terracota suave (clay): acento complementario, usado solo en indicadores y elementos puntuales.
+  - Neutros cálidos (sand, line, field, mute): rellenos, bordes y texto secundario.
+  Contrastes verificados (WCAG): texto >= 4,5:1; bordes de campos y marcas de gráficos >= 3:1.
+  Radios: 8 px en controles, 12 px en superficies. Sombras: solo una muy discreta en tarjetas, y en diálogos/avisos.
+*/
+@theme {
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-wine-50: #f8edeb;
+  --color-wine-100: #f0dad8;
+  --color-wine-200: #e2bdc1;
+  --color-wine-300: #cf97a3;
+  --color-wine-400: #b76d7f;
+  --color-wine-500: #9c475b;
+  --color-wine-600: #85324a; /* bordó principal */
+  --color-wine-700: #6b2638;
+  --color-wine-800: #4e1b28;
+  --color-wine-900: #36121b;
+
+  --color-clay-50: #fbf0e9;
+  --color-clay-100: #f5e0d3;
+  --color-clay-200: #eac6b3;
+  --color-clay-300: #dca58e;
+  --color-clay-400: #c98568;
+  --color-clay-500: #b56b50; /* terracota suave: acentos */
+  --color-clay-600: #9c563f;
+  --color-clay-700: #7f442f;
+  --color-clay-800: #623626;
+
+  --color-paper: #f4ecdf; /* fondo general: marfil cálido */
+  --color-card: #fffcf8; /* tarjetas: blanco roto */
+  --color-sand: #ebe1d1; /* rellenos neutros */
+  --color-ink: #2b2225;
+  --color-mute: #5f5357; /* texto secundario */
+  --color-line: #e2d6c3; /* bordes y separadores suaves */
+  --color-line-strong: #d3c5b0; /* bordes de avisos y recuadros punteados */
+  --color-field: #8a7b70; /* borde de campos de formulario (3,5:1 o más) */
+  --color-ok: #3d6b4f;
+  --color-warn: #8a5a14;
+
+  --shadow-card: 0 1px 2px rgb(78 27 40 / 0.07), 0 3px 10px -4px rgb(78 27 40 / 0.08);
+}
+
+@layer base {
+  html { background: var(--color-paper); color: var(--color-ink); color-scheme: light; scroll-padding-top: 1rem; }
+  body { font-family: var(--font-sans); font-size: 1rem; line-height: 1.55; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.01em; line-height: 1.15; text-wrap: balance; }
+  :focus-visible { outline: 3px solid var(--color-wine-400); outline-offset: 2px; border-radius: 6px; }
+  ::selection { background: var(--color-wine-100); }
+  dialog::backdrop { background: rgb(42 34 37 / 0.45); }
+  input, select, textarea { font: inherit; color: inherit; }
+  input[type='date'] { min-width: 0; }
+}
+
+@layer components {
+  /* Superficie estándar: tarjetas, listas y tablas */
+  .surface { background: var(--color-card); border: 1px solid var(--color-line); border-radius: 0.75rem; box-shadow: var(--shadow-card); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

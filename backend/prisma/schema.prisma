@@ -1,0 +1,121 @@
+// Modelo de datos de DanceTrack (ver README para el diagrama y las decisiones).
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  DANCER
+  TEACHER
+  ADMIN
+}
+
+enum ActivityType {
+  CLASS
+  REHEARSAL
+  TECHNIQUE
+  CROSS_TRAINING
+  OTHER
+}
+
+enum LinkStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  REVOKED
+}
+
+model User {
+  id               String   @id @default(cuid())
+  name             String
+  email            String   @unique // siempre en minúsculas
+  passwordHash     String
+  role             Role     @default(DANCER)
+  isActive         Boolean  @default(true)
+  bio              String?
+  mainDisciplineId Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  mainDiscipline Discipline?   @relation("MainDiscipline", fields: [mainDisciplineId], references: [id], onDelete: SetNull)
+  trainings      Training[]
+  teacherLinks   TeacherLink[] @relation("TeacherSide")
+  dancerLinks    TeacherLink[] @relation("DancerSide")
+
+  @@index([role])
+  @@index([mainDisciplineId])
+}
+
+model Discipline {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  trainings Training[]
+  users     User[]     @relation("MainDiscipline")
+}
+
+model Training {
+  id                    String       @id @default(cuid())
+  userId                String
+  disciplineId          Int
+  date                  DateTime     @db.Date
+  activityType          ActivityType
+  durationMinutes       Int
+  intensity             Int // 1..10 (CHECK en la migración)
+  energyLevel           Int // 1..5  (CHECK en la migración)
+  restHours             Float? // 0..24 (CHECK en la migración)
+  hasDiscomfort         Boolean      @default(false)
+  discomfortDescription String?
+  notes                 String?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  discipline Discipline @relation(fields: [disciplineId], references: [id], onDelete: Restrict)
+
+  @@index([userId, date])
+  @@index([disciplineId])
+}
+
+// Asociación profesor-bailarín. Solo está "activa" cuando status = ACCEPTED.
+model TeacherLink {
+  id          String     @id @default(cuid())
+  teacherId   String
+  dancerId    String
+  status      LinkStatus @default(PENDING)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  respondedAt DateTime?
+
+  teacher     User               @relation("TeacherSide", fields: [teacherId], references: [id], onDelete: Cascade)
+  dancer      User               @relation("DancerSide", fields: [dancerId], references: [id], onDelete: Cascade)
+  permissions SharingPermission?
+
+  @@unique([teacherId, dancerId])
+  @@index([dancerId, status])
+  @@index([teacherId, status])
+}
+
+// Qué comparte el bailarín con ese profesor. Todo es privado (false) por defecto.
+model SharingPermission {
+  id              String   @id @default(cuid())
+  linkId          String   @unique
+  shareSummary    Boolean  @default(false) // métricas agregadas
+  shareHistory    Boolean  @default(false) // listado: fecha, disciplina, tipo, duración, intensidad
+  shareEnergyRest Boolean  @default(false) // energía y descanso en el listado
+  shareDiscomfort Boolean  @default(false) // molestias
+  shareNotes      Boolean  @default(false) // observaciones personales
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  link TeacherLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+}
