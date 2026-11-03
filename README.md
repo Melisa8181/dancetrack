@@ -1,126 +1,205 @@
-# DanceTrack
+# DanceTrack 💃
 
-Aplicación web para registrar y seguir el entrenamiento de bailarines. Proyecto académico individual.
+**Aplicación web para el registro y seguimiento de entrenamientos de danza.**
 
-- **Frontend:** React + TypeScript + Vite + React Router + Tailwind CSS (Fetch API).
-- **Backend:** Node.js + Express + TypeScript (API REST, validación con Zod).
-- **Base de datos:** PostgreSQL + Prisma ORM (migraciones y seed).
+DanceTrack permite a bailarines y bailarinas registrar sus sesiones de entrenamiento, consultar su actividad y realizar un seguimiento de su evolución.
 
-> DanceTrack **no es una aplicación médica**: no diagnostica lesiones ni da recomendaciones de salud.
+También incorpora un sistema de vinculación entre profesores y bailarines, donde el acceso a la información depende de los permisos otorgados por cada usuario.
 
-## Documentación
+<https://dancetrack-app.vercel.app>
 
-| Archivo | Contenido |
-|---|---|
-| `docs/ARQUITECTURA.md` | Estructura, modelo de datos, roles y permisos, decisiones técnicas |
-| `docs/API.md` | Endpoints con ejemplos de solicitud y respuesta |
-| `docs/PRUEBAS.md` | Qué se probó, cómo ejecutarlo, qué quedó pendiente y limitaciones conocidas |
+---
 
-## Requisitos (Windows)
+## Funcionalidades
 
-1. **Node.js 20 o superior** (recomendado 22 LTS): https://nodejs.org — verificá con `node -v`.
-2. **PostgreSQL 14 o superior**: https://www.postgresql.org/download/windows/ (anotá la contraseña del usuario `postgres`).
-3. **Git** (opcional) y una terminal (PowerShell).
+### Bailarines
 
-## Instalación paso a paso
+- Registro e inicio de sesión.
+- Registro de entrenamientos por disciplina y tipo de actividad.
+- Seguimiento de duración, intensidad, energía, descanso y molestias.
+- Historial de entrenamientos.
+- Dashboard con resúmenes y métricas de actividad.
+- Gestión del perfil y de los permisos de privacidad.
 
-### 1. Crear las bases de datos
+### Profesores
 
-Abrí PowerShell y ejecutá (te pedirá la contraseña de `postgres`; si `psql` no se reconoce, usá "SQL Shell (psql)" del menú Inicio o agregá `C:\Program Files\PostgreSQL\<versión>\bin` al PATH):
+- Consulta de bailarines vinculados y que aceptaron la relación.
+- Acceso a información compartida por cada bailarín.
+- Visualización condicionada por permisos individuales.
 
-```powershell
-psql -U postgres -c "CREATE USER dancetrack WITH PASSWORD 'dancetrack' CREATEDB;"
-psql -U postgres -c "CREATE DATABASE dancetrack OWNER dancetrack;"
-psql -U postgres -c "CREATE DATABASE dancetrack_test OWNER dancetrack;"
+### Administradores
+
+- Gestión de usuarios y roles.
+- Activación y desactivación de cuentas.
+- Administración de disciplinas.
+- Gestión de vínculos entre profesores y bailarines.
+
+## Tecnologías
+
+| Área                        | Tecnologías                    |
+| --------------------------- | ------------------------------ |
+| Frontend                    | React 19, TypeScript, Vite     |
+| Estilos                     | Tailwind CSS 4                 |
+| Navegación                  | React Router DOM 7             |
+| Backend                     | Node.js, Express 5, TypeScript |
+| Base de datos               | PostgreSQL                     |
+| ORM                         | Prisma 6                       |
+| Validación                  | Zod                            |
+| Autenticación               | JWT y cookies `httpOnly`       |
+| Pruebas                     | Vitest y Supertest             |
+| Frontend en producción      | Vercel                         |
+| Backend en producción       | Render                         |
+| Base de datos en producción | Neon                           |
+
+## Arquitectura
+
+El sistema utiliza una arquitectura cliente-servidor:
+
+- **Frontend:** gestiona la interfaz y las interacciones con los usuarios.
+- **Backend:** expone una API REST que procesa solicitudes, valida datos y controla la autenticación y autorización.
+- **Base de datos:** PostgreSQL, administrada mediante Prisma ORM.
+
+El frontend se comunica exclusivamente con la API REST. No accede directamente a la base de datos.
+
+## Capturas de pantalla
+
+### Página principal
+
+![Landing de DanceTrack](docs/images/landing.png)
+
+### Dashboard
+
+![Dashboard de DanceTrack](docs/images/dashboard.png)
+
+### Registro de entrenamientos
+
+![Formulario de entrenamiento](docs/images/entrenamiento.png)
+
+### Privacidad y permisos
+
+![Configuración de privacidad](docs/images/privacidad.png)
+
+## Demo
+
+**Aplicación:** https://dancetrack-app.vercel.app
+
+## Instalación local
+
+### Requisitos
+
+- Node.js 22 o compatible con las dependencias del proyecto.
+- npm.
+- PostgreSQL.
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/Melisa8181/dancetrack.git
+cd dancetrack
 ```
 
-(`dancetrack_test` se usa solo para las pruebas automáticas; **sus tablas se vacían** en cada ejecución.)
+### 2. Configurar el backend
 
-### 2. Backend
-
-```powershell
+```bash
 cd backend
 npm install
-Copy-Item .env.example .env
 ```
 
-Editá `backend/.env`:
-- `JWT_SECRET`: reemplazalo por un valor aleatorio de 32+ caracteres. Generá uno con:
-  `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"`
-- `DATABASE_URL` y `TEST_DATABASE_URL`: ajustá usuario/contraseña si usaste otros.
+Crear un archivo `.env` a partir de `.env.example`.
 
-Luego creá las tablas, generá el cliente y cargá datos de demostración:
+Configurar las siguientes variables:
 
-```powershell
-npm run prisma:deploy     # aplica las migraciones sobre la base nueva
-npm run prisma:generate   # genera el cliente de Prisma
-npm run db:seed           # disciplinas + cuentas y datos de demostración
-npm run dev               # API en http://localhost:4000
+| Variable            | Descripción                                   |
+| ------------------- | --------------------------------------------- |
+| `NODE_ENV`          | Entorno de ejecución                          |
+| `PORT`              | Puerto del servidor                           |
+| `DATABASE_URL`      | Conexión a PostgreSQL                         |
+| `TEST_DATABASE_URL` | Base de datos independiente para pruebas      |
+| `JWT_SECRET`        | Secreto para firmar las sesiones              |
+| `CLIENT_ORIGIN`     | Origen autorizado del frontend                |
+| `APP_TIMEZONE`      | Zona horaria de la aplicación                 |
+| `DEMO_PASSWORD`     | Contraseña de las cuentas creadas por el seed |
+
+Crear previamente las bases de datos en PostgreSQL. La base de pruebas debe ser independiente de la principal.
+
+Aplicar las migraciones y generar el cliente de Prisma:
+
+```bash
+npm run prisma:deploy
+npm run prisma:generate
 ```
 
-### 3. Frontend (otra terminal)
+Para cargar los datos iniciales de demostración en una base nueva:
 
-```powershell
+```bash
+npm run db:seed
+```
+
+Iniciar el backend:
+
+```bash
+npm run dev
+```
+
+### 3. Configurar el frontend
+
+Abrir otra terminal y regresar a la carpeta raíz:
+
+```bash
 cd frontend
 npm install
-npm run dev               # http://localhost:5173
 ```
 
-Abrí http://localhost:5173. En desarrollo, Vite reenvía `/api` al backend, por lo que no hace falta configurar nada más.
+El archivo `.env` del frontend es opcional en desarrollo. La aplicación utiliza `/api` como configuración predeterminada.
 
-## Cuentas de demostración
+Para iniciar el frontend:
 
-Las crea `npm run db:seed` (solo fuera de producción). Contraseña de todas: la de `DEMO_PASSWORD` (por defecto `Demo12345`).
-
-| Correo | Rol | Notas |
-|---|---|---|
-| `admin@dancetrack.test` | Administrador | |
-| `profe@dancetrack.test` | Profesor | Vinculada con Ana (acepta) y Lucía (pendiente) |
-| `ana@dancetrack.test` | Bailarina | Comparte con la profesora solo resumen y listado; molestias y observaciones **privadas** |
-| `lucia@dancetrack.test` | Bailarina | Tiene una solicitud de vínculo pendiente para aceptar en *Privacidad* |
-
-## Crear el administrador inicial (procedimiento seguro)
-
-El registro público **siempre** crea bailarines; no existe ningún botón para crear administradores. Para el primer administrador real:
-
-```powershell
-cd backend
-$env:ADMIN_EMAIL="tu-correo@ejemplo.com"
-$env:ADMIN_NAME="Tu Nombre"
-$env:ADMIN_PASSWORD="UnaClaveLarga123"     # mínimo 10 caracteres, letras y números
-npm run create-admin
-Remove-Item Env:ADMIN_PASSWORD
+```bash
+npm run dev
 ```
 
-Las credenciales se leen del entorno (no quedan en argumentos de comandos). Si el correo ya existe, el script no modifica nada. Después el administrador puede promover a otros usuarios desde *Administración*.
+Vite mostrará la dirección local para acceder a la aplicación.
 
-## Scripts útiles
+### 4. Ejecutar las pruebas
 
-| Dónde | Comando | Qué hace |
-|---|---|---|
-| backend | `npm run dev` | API con recarga automática |
-| backend | `npm run build` / `npm start` | Compila a `dist/` y ejecuta |
-| backend | `npm run typecheck` | Verifica tipos |
-| backend | `npm test` | Pruebas automáticas (usa `TEST_DATABASE_URL`) |
-| backend | `npm run db:seed` | Datos de demostración (idempotente) |
-| backend | `npx prisma migrate dev --name <cambio>` | Crear una nueva migración al modificar `schema.prisma` |
-| frontend | `npm run dev` | Servidor de desarrollo |
-| frontend | `npm run build` | Verifica tipos y genera `dist/` |
+Desde la carpeta `backend`:
 
-## Resolución de errores frecuentes
+```bash
+npm test
+```
 
-- **`Configuración de entorno inválida`** al iniciar el backend: falta o es inválida una variable de `backend/.env` (ver `.env.example`). `JWT_SECRET` debe tener 32+ caracteres.
-- **`ECONNREFUSED 127.0.0.1:5432`**: PostgreSQL no está en ejecución. Iniciá el servicio ("Servicios" de Windows → `postgresql-x64-XX`).
-- **`password authentication failed`**: usuario o contraseña incorrectos en `DATABASE_URL`.
-- **`database "dancetrack" does not exist`**: creá las bases (paso 1).
-- **`npm run prisma:deploy` dice que no hay migraciones o falla**: verificá que estás en `backend/` y que `DATABASE_URL` apunta a la base correcta.
-- **`prisma migrate dev` propone una migración nueva o detecta "drift"**: en una base de desarrollo descartable, ejecutá `npx prisma migrate reset` (borra y recrea todo) y luego `npm run db:seed`. Si persiste, ver "Limitaciones conocidas" en `docs/PRUEBAS.md`.
-- **`EPERM` al generar el cliente de Prisma en Windows**: detené `npm run dev` del backend y reintentá `npm run prisma:generate`.
-- **El frontend muestra "No se pudo conectar con el servidor"**: el backend no está corriendo en el puerto 4000.
-- **Error 403 `BAD_ORIGIN`**: accediste al frontend desde un origen distinto de `CLIENT_ORIGIN` (por defecto `http://localhost:5173`; no uses `127.0.0.1`). Ajustá `CLIENT_ORIGIN` si cambiás el puerto.
-- **Los tests se niegan a ejecutarse**: `TEST_DATABASE_URL` debe existir, ser distinta de `DATABASE_URL` y su base debe terminar en `_test` (protección contra vaciar datos reales).
-- **Puerto ocupado** (`EADDRINUSE`): cambiá `PORT` en `backend/.env` y el `target` del proxy en `frontend/vite.config.ts`.
+Para verificar los tipos:
 
-## Despliegue (nota breve)
+```bash
+npm run typecheck
+```
 
-En producción: `NODE_ENV=production` (activa cookie `Secure`), HTTPS obligatorio, `CLIENT_ORIGIN` con el dominio real del frontend, un `JWT_SECRET` propio y `npm run prisma:deploy` (nunca `migrate dev`). Si frontend y API están en dominios distintos, ver "Limitaciones conocidas".
+Para compilar el backend:
+
+```bash
+npm run build
+```
+
+Desde la carpeta `frontend`, para compilar la aplicación:
+
+```bash
+npm run build
+```
+
+**Importante:** no utilizar la base de producción para ejecutar pruebas. Tampoco ejecutar el seed sobre una base existente sin revisar previamente su comportamiento.
+
+## Documentación adicional
+
+- [Arquitectura y decisiones técnicas](docs/ARQUITECTURA.md)
+- [Documentación de la API](docs/API.md)
+- [Pruebas y limitaciones](docs/PRUEBAS.md)
+
+## Estado del proyecto
+
+Proyecto académico desarrollado en el marco de la Tecnicatura Superior en Desarrollo de Software del ISFT 204.
+
+La aplicación cuenta con autenticación, gestión de roles y permisos, registro de entrenamientos, seguimiento de actividad y despliegue en producción.
+
+## Autora
+
+**Melisa Segura**
